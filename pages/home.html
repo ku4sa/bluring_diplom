@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="send_token.js"></script>
+    <script>
+        token = parseData(location)
+        sendToken(token)
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+         «Блюринг» изображений</title>
+    <!-- Здесь вы можете добавить дополнительные метатеги, стили и скрипты -->
+</head>
+
+<body>
+
+    <header>
+        <div class="header-content">
+          <h1> "Блюринг" изображений</h1>
+        </div>
+            </header>
+
+        <div class="d-grid gap-2 col-4">
+                <h3 id="username"></h3>
+                        </div>
+                        <div class="d-grid gap-5 col-3">
+                            
+                              <button type="button" class="btn btn-secondary">Выбрать файл</button>
+                              <div class="input-group">
+                                <button class="btn btn-secondary" type="button">Процент блюринга</button>
+                                <input type="number" class="form-control" value="0" min="0" max="100" /></div>
+                                <button type="button" class="btn btn-secondary">Размыть изображение</button>
+                                <button type="button" class="btn btn-secondary">Скачать изображение</button>
+                           
+                            </div>
+                         </div>
+                          </div>
+
+                        
+
+    <script>
+        function selectImage() {
+            const fileInput = document.getElementById('fileInput');
+            fileInput.click();
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'i') {
+                const fileInput = document.getElementById('fileInput');
+                fileInput.click();
+            }
+        });
+
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const imageDisplayArea = document.getElementById('imageDisplayArea');
+                const img = new Image();
+                img.src = e.target.result;
+                imageDisplayArea.innerHTML = '';
+                imageDisplayArea.appendChild(img);
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+
+    </script>
+</body>
+
+</html>

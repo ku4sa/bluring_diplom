@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="auth.js"></script>
+<script src="send_token.js"></script>
+<script>
+  //token = parseData(location)
+  sendToken(token)
+</script>
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    Авторизация</title>
+  <!-- Здесь вы можете добавить дополнительные метатеги, стили и скрипты -->
+</head>
+
+<body>
+
+  <header>
+    <div class="header-content">
+      <h1> "Блюринг" изображений</h1>
+    </div>
+  </header>
+
+
+
+
+
+  <form id="signInForm">
+    <p></p>
+    <label for="login">Имя пользователя:</label>
+    <input type="text" id="login" name="login" required autocomplete="off">
+    <label for="password">Пароль:</label>
+    <input type="password" id="password" name="password" required autocomplete="off">
+    <input type="submit" value="Войти" onclick="signIn()">
+
+    <button id="googlebtn" class="btn btn-dark text-justify" type="button" onclick="signInWithGoogle()">Войти через
+      Google
+
+      <img src="icons8-google.svg" style="float: right ; margin-left:auto;" alt="Google Logo" width="30px"
+        height="20px" />
+    </button>
+    <p>У вас нет аккаунта? <a href="register.html">Регистрация</a></p>
+  </form>
+
+  <div id="popup" class="hidden">
+    <div class="popup-content">
+      <p id="popup-message">This is the popup message.</p>
+      <button id="close-button">Ok</button>
+    </div>
+  </div>
+  
+  <script>
+    const popup = document.getElementById('popup');
+    const closeButton = document.getElementById('close-button');
+
+    function show() {
+      popup.style.display = 'block';
+    }
+    // Close the popup when the close button is clicked
+    closeButton.addEventListener('click', () => {
+      popup.style.display = 'none';
+    });
+  </script>
+
+</body>
+
+</html>

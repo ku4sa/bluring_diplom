@@ -1,0 +1,117 @@
+h1 {
+    text-align: center;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+form {
+    width: 300px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+input[type="submit"] {
+    width: 100%;
+    height: 40px;
+    background-color: #3c372c;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #3c372c;
+}
+
+.btn {
+    width: 100%;
+    height: 40px;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+body {
+    background-color: #f0e7e7;
+}
+
+header {
+    background-color: #3c372c;
+    /* light gray background */
+    padding: 20px;
+    /* add some padding */
+    text-align: center;
+    /* center the text */
+}
+
+.header-content {
+    max-width: 1200px;
+    /* set a maximum width */
+    margin: 0 auto;
+    /* center the content */
+}
+
+h1 {
+    font-size: 36px;
+    /* set the font size */
+    font-weight: bold;
+    /* make the text bold */
+    color: #ffffff;
+    /* set the text color */
+}
+
+/*для ошибки*/
+#popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    z-index: 100; /* Sit on top of other elements */
+    display: none; /* Initially hidden */
+  }
+  
+  .popup-content {
+    text-align: center;
+  }
+  
+  #popup-message {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  #close-button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+/**/

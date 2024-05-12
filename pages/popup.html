@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<script>
+    function getHidden() {
+        const popup = document.getElementById('popup');
+        popup.addClass('hidden'); // 
+    }
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Popup with Server Response</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/scripts/auth.js"></script>
+</head>
+
+<body>
+    <button id="fetchButton">Fetch Data</button>
+
+    <div id="popup" class="hidden">
+        <div class="popup-content">
+            <h2 id="popupMessage"></h2>
+            <button id="closeButton" onclick="getHidden()">Close</button>
+        </div>
+    </div>
+
+</body>
+
+</html>
