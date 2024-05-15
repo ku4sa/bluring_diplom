@@ -36,9 +36,12 @@ function sendToken(token) {
         .then(data => {
             console.log(data)
             if (data.email != null) {
+
+                sessionStorage.setItem('username', data.email);
+                sessionStorage.setItem('image', data.image);
                 // Успешная регистрация
                 window.location.href = "/home.html";
-               // alert('Регистрация прошла успешно!');
+                // alert('Регистрация прошла успешно!');
                 parseUserInfo(data)
 
 

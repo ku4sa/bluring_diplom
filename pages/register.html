@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-    
+
 <script src="auth.js"></script>
-<script src="send_user_info.js"></script>
+
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -19,26 +19,45 @@
         <h1>Регистрация</h1>
     </header>
 
-   
-		
-	<form action="" method="post">
-		
-		<p></p>
-		<label for="login">Имя пользователя:</label>
-		<input type="text" id="login" name="login" required>
-		<label for="password">Введите новый пароль:</label>
-    		<input type="password" id="password" name="password" required>
-            <label for="password">Повторите пароль:</label>
-    		<input type="password" id="password" name="password" required>
-            <div 
-            button class="btn btn-primary btn " id="googlebutton" type="button"
-            onclick="signUp()">Зарегистрироваться
-        </div>
-        
-        
-	</form>
 
-   
+
+    <form id="signUpForm">
+
+        <p></p>
+        <label for="login">Имя пользователя:</label>
+        <input type="text" id="login" name="login" required>
+        <label for="password">Введите пароль:</label>
+        <input type="password" id="password" name="password" required>
+        <label for="password">Повторите пароль:</label>
+        <input type="password" id="password1" name="password" required>
+
+        <input type="submit" value="Зарегистрироваться" onclick="signUp()">
+        </div>
+
+
+    </form>
+
+    <div id="popup" class="hidden">
+        <div class="popup-content">
+            <p id="popup-message">This is the popup message.</p>
+            <button id="close-button">Ok</button>
+        </div>
+    </div>
+
+    <script>
+        const popup = document.getElementById('popup');
+        const closeButton = document.getElementById('close-button');
+
+        function show() {
+            popup.style.display = 'block';
+        }
+        // Close the popup when the close button is clicked
+        closeButton.addEventListener('click', () => {
+            popup.style.display = 'none';
+        });
+    </script>
+
+
 
 
 </body>

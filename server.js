@@ -2,12 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const { error } = require('console');
+
 //var pgp = require("pg-promise")(/*options*/);
 //var db = pgp("postgres://postgres:12345@host:port/database");
 
 const { Client } = require('pg'); // Assuming you're using the 'pg' library
 const connectionString = 'postgres://postgres:120902@localhost:8080/bluring_bd';
-
 
 
 
@@ -90,8 +90,8 @@ app.post('/getInfo', (req, res) => {
 
 
 app.post('/sign_in', async (req, res) => {
-
-  const client = new Client({ connectionString: connectionString });
+  
+ const client = new Client({ connectionString: connectionString });
   login = req.body['login']
   password = req.body['password']
 
@@ -108,7 +108,7 @@ app.post('/sign_in', async (req, res) => {
       if (user.password == password) {
         console.log("Успешная авторизация", user)
        
-        res.status(200).send({ 'code': 200, 'message': 'успешно', });
+        res.status(200).send({ 'code': 200, 'username': login, });
       } else {
         //res.render('error', { errorMessage: 'Неверный пароль' });
         res.status(400).send({ 'code': 400, 'error': 'Неверный пароль' });
@@ -135,7 +135,6 @@ app.post('/sign_up', async (req, res) => {
   console.log("user", req.body);
   login = req.body.login
   password = req.body.password
-  await client.connect();
   // Insert form data into the database
   try {
     const query = `SELECT * FROM users WHERE login = $1`;
@@ -144,17 +143,14 @@ app.post('/sign_up', async (req, res) => {
 
     const result = await client.query(query, values);
     //пользователь найден
-    if (result.rows.length > 0) {
+    if (result.rows.length == 0) {
+      await client.query('INSERT INTO public.users (login, password) VALUES ($1, $2)', [login, password]);
 
-      res.status(403).send('Пользователь с таким логином уже существует')
+      res.status(200).send({ 'code': 200, 'username': login, });
     } else {
-      const query = 'INSERT INTO public.users (login, password) VALUES ($1, $2)'
-      const values = [username, password];
-      await client.query(query, values);
-      console.log('Успешная регистрация');
-      // res.status(201).send('Успешная регистрация!');
-      res.redirect('/home.html');
+      res.status(403).send({ 'code': 403, 'error': 'Пользователь с таким логином уже существует' });
     }
+
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(500).send('Неудачная попытка регестрации');
@@ -163,11 +159,32 @@ app.post('/sign_up', async (req, res) => {
   }
 })
 
-app.get('/token', (req, res) => {
+app.get('/data', (req, res) => {
   console.log('lol');
-  console.log(req)
-  //res.redirect('/home.html', 302);
+  console.log(req.query)
+  /*let params = {}
+    let regex = /([^&=]+)=([^&]+)/g, m;
+    while (m = regex.exec(location.href)) {
+        params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
+        console.log(m[1])
+        console.log(m[2])
+
+    }
+    if (Object.keys(params).length > 0) {
+
+        localStorage.setItem('authInfo', JSON.stringify(params))
+    }
+    //hide access token
+    window.history.pushState({}, document.title, "/" + "auth.html")
+    //let info = JSON.parse(localStorage.getItem('authInfo'))
+    console.log(JSON.parse(localStorage.getItem('authInfo')))
+    console.log(info['access_token'])
+    console.log(info['expires_in'])
+    return info['access_token'];*/
+  res.redirect('/token.html', 302);
 });
+
+
 
 
 app.use(express.static(__dirname + "/pages"));

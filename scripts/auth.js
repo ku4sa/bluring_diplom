@@ -25,9 +25,15 @@ function signIn() {
     })
       .then(response => response.json()) // Обработать ответ JSON
       .then(data => {
-        console.log(data)
+
         if (data.code == 200) {
+          console.log(data)
+          sessionStorage.setItem('username', data.username);
+
+          // Успешная регистрация
           window.location.href = "/home.html";
+
+
         }
         else {
           popupMessage.innerHTML = data.error
@@ -42,7 +48,62 @@ function signIn() {
   });
 }
 
+function signUp() {
 
+  const registrationForm = document.getElementById('signUpForm');
+  const popup = document.getElementById('popup');
+  const popupMessage = document.getElementById('popup-message');
+
+  registrationForm.addEventListener('submit', (event) => {
+    event.preventDefault(); // Предотвратить перезагрузку страницы
+    const login = document.getElementById('login').value;
+    const password = document.getElementById('password').value;
+    const password1 = document.getElementById('password1').value;
+
+    const formData = {
+      login, password,
+    };
+    if (password == password1) {
+
+
+      console.log(formData)
+
+      fetch('/sign_up', {
+        method: 'POST',
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({ 'login': login, 'password': password })
+      })
+        .then(response => response.json()) // Обработать ответ JSON
+        .then(data => {
+          console.log(data)
+          if (data.code == 200) {
+
+            console.log(data)
+            sessionStorage.setItem('username', data.username);
+
+            // Успешная регистрация
+            window.location.href = "/home.html";
+
+          }
+          else {
+            popupMessage.innerHTML = data.error
+            popup.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          console.log(error)
+          popupMessage.text = error
+          popup.style.display = 'block';
+        });
+    } else {
+      popupMessage.innerHTML = "Пароли не совпадают"
+      popup.style.display = 'block';
+    }
+  });
+}/*
 function signUp() {
   const registrationForm = document.getElementById('signUpForm');
 
@@ -76,7 +137,7 @@ function signUp() {
       });
   });
 }
-
+*/
 
 function signInWithGoogle() {
 
@@ -86,7 +147,7 @@ function signInWithGoogle() {
   form.setAttribute('action', endPoint);
   var params = {
     'client_id': '328302254173-7cd4u2f4jrkj9is6891suua3s89pu8ae.apps.googleusercontent.com',
-    'redirect_uri': 'http://localhost:3000/token.html',
+    'redirect_uri': 'http://localhost:3000/data',
     'response_type': 'token',
     'scope': ['https://www.googleapis.com/auth/userinfo.email'],
     'include_granted_scopes': 'true',
