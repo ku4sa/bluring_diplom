@@ -4,7 +4,7 @@
 <head>
     <script src="send_token.js"></script>
     <script scr="file_load.js"></script>
-
+    <script scr="blur_send.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
@@ -58,26 +58,17 @@
                 onclick="viewUploadLoader()">Выбрать другое изображение
             </button>
         </div>
-        <div class="imageContainer" id="imageContainer"></div>
-        <input type="range" list="tickmarks" step="10">
-        <datalist id="tickmarks">
-            <option value="0" label="0%">
-            <option value="10">
-            <option value="20">
-            <option value="30">
-            <option value="40">
-            <option value="50" label="50%">
-            <option value="60">
-            <option value="70">
-            <option value="80">
-            <option value="90">
-            <option value="100" label="100%">
-        </datalist>
-        <div class="input-group">
-            <button class="btn btn-secondary" type="button">Процент блюринга</button>
-            <input type="number" class="form-control" value="0" min="0" max="100" />
+        <div id="blur_settings" class="blur_settings">
+            <div class="imageContainer" id="imageContainer"></div>
+
+
+            <div class="form-group">
+                <label for="blurPercentage">Процент блюринга:</label>
+                <input type="number" class="form-control" id="blurPercentage" min="1" max="100" value="0">
+            </div>
+
+            <button type="button" class="btn btn-secondary" onclick="sendFile()">Размыть изображение</button>
         </div>
-        <button type="button" class="btn btn-secondary">Размыть изображение</button>
         <button type="button" class="btn btn-secondary">Скачать изображение</button>
 
         </div>
@@ -129,6 +120,45 @@
             }
         </script>
         <script src="file_load.js"></script>
+        <script scr="blur_send.js"></script>
+        <script>
+            function sendFile() {
+                const uploadInput = document.querySelector(".form-upload__input")
+                const blurPercentage = document.getElementById('blurPercentage')
+                const file = uploadInput.files?.[0]
+                console.log(file)
+                if (file && file.type.startsWith("image/")) {
+                    console.log(blurPercentage.value)
+                    const formData = new FormData()
+                    formData.append("file", file)
+                    formData.append("percent_blur", blurPercentage.value)
+                    fetch('/blur', {
+                        method: 'POST',
+                        headers: {
+                        },
+                        body: formData
+                    })
+                        .then(response => response.json()) // Обработать ответ JSON
+                        .then(data => {
+
+                            if (data.code == 200) {
+                                console.log(data)
+
+
+
+                            }
+                            else {
+
+
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error)
+
+                        });
+                }
+            };
+        </script>
 
 
     </body>

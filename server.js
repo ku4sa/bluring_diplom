@@ -3,26 +3,12 @@ const bodyParser = require('body-parser');
 
 const { error } = require('console');
 
-//var pgp = require("pg-promise")(/*options*/);
-//var db = pgp("postgres://postgres:12345@host:port/database");
-
 const { Client } = require('pg'); // Assuming you're using the 'pg' library
 const connectionString = 'postgres://postgres:120902@localhost:8080/bluring_bd';
-
-
-
-/*const { Client } = require('pg');
-var pgp = require("pg-promise")(/*options);
-var db = pgp("postgres://postgres:120902@localhost:5432/bluring_bd");*/
-
-/*db.one("SELECT $1 AS value", 123)
-    .then(function (data) {
-        console.log("DATA:", data.value);
-    })
-    .catch(function (error) {
-        console.log("ERROR:", error);
-    });*/
-
+//const sharp = require('sharp');
+const multer = require('multer');
+const { type } = require('os');
+const upload = multer();
 
 
 const app = express();
@@ -90,8 +76,8 @@ app.post('/getInfo', (req, res) => {
 
 
 app.post('/sign_in', async (req, res) => {
-  
- const client = new Client({ connectionString: connectionString });
+
+  const client = new Client({ connectionString: connectionString });
   login = req.body['login']
   password = req.body['password']
 
@@ -107,14 +93,14 @@ app.post('/sign_in', async (req, res) => {
       console.log(user)
       if (user.password == password) {
         console.log("Успешная авторизация", user)
-       
+
         res.status(200).send({ 'code': 200, 'username': login, });
       } else {
         //res.render('error', { errorMessage: 'Неверный пароль' });
         res.status(400).send({ 'code': 400, 'error': 'Неверный пароль' });
       }
     } else {
-      res.status(404).send({'code': 404, 'error': 'Пользователь не найден' });
+      res.status(404).send({ 'code': 404, 'error': 'Пользователь не найден' });
 
       // res.render('error', { errorMessage: 'Пользователь не найден' });
     }
@@ -183,6 +169,33 @@ app.get('/data', (req, res) => {
     return info['access_token'];*/
   res.redirect('/token.html', 302);
 });
+
+
+app.post('/blur', upload.single('file')
+  , async (req, res) => {
+    console.log('Полученный файл');
+    const uploadedFile = req.file;
+    const integerValue = parseInt(req.body.percent_blur);
+    console.log(uploadedFile);
+    console.log(integerValue)
+    if (uploadedFile) {
+
+
+      //const buffer = Buffer.from(uploadedFile.buffer, 'base64');
+
+      // Размыть изображение с помощью Sharp
+      /* const blurredImage = await sharp(uploadedFile.buffer)
+         .blur(integerValue) // Значение размытия (в пикселях)
+         .toBuffer();
+ 
+       // Отправить размытое изображение в ответ
+       res.send(blurredImage.toString('base64'));*/
+      res.status(200).send({ 'message': "Ок" })
+    }
+    else { res.status(400).send({ 'message': "Error" }) }
+  })
+
+
 
 
 

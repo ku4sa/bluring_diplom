@@ -4,7 +4,7 @@ const sizeText = document.getElementById("uploadForm_Size")
 const uploadInput = document.querySelector(".form-upload__input")
 const imageDisplay = document.querySelector("image-display")
 
-
+const blurSettings = document.querySelector(".blur_settings")
 
 let setStatus = (text) => {
   statusText.textContent = text
@@ -121,6 +121,7 @@ function hideUploadLoader() {
   }
   if (btn) {
     btn.style.display = "block";
+    blurSettings.style.display = "flex"
 
   } else {
     console.warn("Element with ID 'uploadFile_Loader' not found");
@@ -140,6 +141,7 @@ function viewUploadLoader() {
   }
   if (btn) {
     btn.style.display = "none";
+    blurSettings.style.display = "none"
 
   } else {
     console.warn("Element with ID 'uploadFile_Loader' not found");
