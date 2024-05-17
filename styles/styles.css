@@ -53,6 +53,7 @@ input[type="submit"]:hover {
   border-radius: 10px;
   cursor: pointer;
   margin-top: 5px;
+  max-width: 600px;
 }
 
 body {
@@ -319,7 +320,7 @@ h1 {
   }
 }
 
-#imageContainer {
+.imageContainer {
   width: 50%;
   height: 50%;
   display: flex;
@@ -366,6 +367,14 @@ h1 {
   flex-direction: column;
   align-items: center;
 }
+
+
+.blur_result {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
 
 
 

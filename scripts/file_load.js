@@ -2,7 +2,7 @@ const dropFileZone = document.querySelector(".upload-zone_dragover")
 const statusText = document.getElementById("uploadForm_Hint")
 const sizeText = document.getElementById("uploadForm_Size")
 const uploadInput = document.querySelector(".form-upload__input")
-const imageDisplay = document.querySelector("image-display")
+//const imageDisplay = document.querySelector("image-display")
 
 const blurSettings = document.querySelector(".blur_settings")
 
@@ -75,38 +75,8 @@ function processingUploadFile(file) {
 
     reader.readAsDataURL(file);
     hideUploadLoader()
-    /*const dropZoneData = new FormData()
-    const xhr = new XMLHttpRequest()
 
-    dropZoneData.append("file", file)
-
-    xhr.open("POST", uploadUrl, true)
-
-    xhr.send(dropZoneData)
-
-    xhr.onload = function () {
-      if (xhr.status == 200) {
-        //setStatus("Всё загружено")
-      } else {
-        // setStatus("Oшибка загрузки")
-      }
-      HTMLElement.style.display = "none"
-    }*/
   }
-}
-
-function processingDownloadFileWithFetch() {
-  fetch(url, {
-    method: "POST",
-  }).then(async (res) => {
-    const reader = res?.body?.getReader();
-    while (true && reader) {
-      const { value, done } = await reader?.read()
-      console.log("value", value)
-      if (done) break
-      console.log("Received", value)
-    }
-  })
 }
 
 
@@ -126,13 +96,18 @@ function hideUploadLoader() {
   } else {
     console.warn("Element with ID 'uploadFile_Loader' not found");
   }
+  //hideResult()
 }
 
 function viewUploadLoader() {
   const uploadLoader = document.getElementById("uploadFile_Loader");
   const btn = document.getElementById("alt_img_btn");
+  const blurResult = document.getElementById("blur_result")
+
+  const blurImageContainer = document.getElementById("blur_imageContainer")
 
   imageContainer.removeChild(imageContainer.firstChild)
+  blurImageContainer.removeChild(blurImageContainer.firstChild)
   if (uploadLoader) {
     uploadLoader.style.display = "grid";
 
@@ -142,8 +117,21 @@ function viewUploadLoader() {
   if (btn) {
     btn.style.display = "none";
     blurSettings.style.display = "none"
-
+    blurResult.style.display = 'none'
   } else {
     console.warn("Element with ID 'uploadFile_Loader' not found");
   }
+
+
+  //hideResult()
+}
+
+
+function hideResult() {
+
+  const blurResult = document.getElementById("blur_result")
+
+
+  blurResult.style.display = 'none'
+
 }

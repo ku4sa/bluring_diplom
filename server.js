@@ -5,7 +5,7 @@ const { error } = require('console');
 
 const { Client } = require('pg'); // Assuming you're using the 'pg' library
 const connectionString = 'postgres://postgres:120902@localhost:8080/bluring_bd';
-//const sharp = require('sharp');
+const sharp = require('sharp');
 const multer = require('multer');
 const { type } = require('os');
 const upload = multer();
@@ -174,6 +174,7 @@ app.get('/data', (req, res) => {
 app.post('/blur', upload.single('file')
   , async (req, res) => {
     console.log('Полученный файл');
+    const format = 'jpg'
     const uploadedFile = req.file;
     const integerValue = parseInt(req.body.percent_blur);
     console.log(uploadedFile);
@@ -184,13 +185,17 @@ app.post('/blur', upload.single('file')
       //const buffer = Buffer.from(uploadedFile.buffer, 'base64');
 
       // Размыть изображение с помощью Sharp
-      /* const blurredImage = await sharp(uploadedFile.buffer)
-         .blur(integerValue) // Значение размытия (в пикселях)
-         .toBuffer();
- 
-       // Отправить размытое изображение в ответ
-       res.send(blurredImage.toString('base64'));*/
-      res.status(200).send({ 'message': "Ок" })
+      const blurredImage = await sharp(uploadedFile.buffer)
+        .blur(integerValue) // Значение размытия (в пикселях)
+        .toFormat(format)
+        .toBuffer();
+
+      res.header('Content-Type', `image/${format}`); // Set image content type
+      res.send(blurredImage); // Send the blurred image buffer
+
+      // Отправить размытое изображение в ответ
+      //res.send(blurredImage.toString('base64'));
+      //res.status(200).send({ 'message': "Ок" })
     }
     else { res.status(400).send({ 'message': "Error" }) }
   })

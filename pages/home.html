@@ -2,9 +2,12 @@
 <html lang="en">
 
 <head>
+
+
+
     <script src="send_token.js"></script>
-    <script scr="file_load.js"></script>
     <script scr="blur_send.js"></script>
+    <script scr="file_load.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
@@ -67,43 +70,18 @@
                 <input type="number" class="form-control" id="blurPercentage" min="1" max="100" value="0">
             </div>
 
-            <button type="button" class="btn btn-secondary" onclick="sendFile()">Размыть изображение</button>
-        </div>
-        <button type="button" class="btn btn-secondary">Скачать изображение</button>
-
-        </div>
-        </div>
+            <button id="action_btn" type="button" class="btn btn-secondary" onclick="bluringImage()">Размыть
+                изображение</button>
         </div>
 
 
-
-        <script>
-
-
-            /* document.addEventListener('keydown', function (event) {
-                 if (event.key === 'i') {
-                     const fileInput = document.getElementById('fileInput');
-                     fileInput.click();
-                 }
-             });
- 
-             fileInput.addEventListener('change', function () {
-                 const file = fileInput.files[0];
-                 const reader = new FileReader();
- 
-                 reader.onload = function (e) {
-                     const imageDisplayArea = document.getElementById('imageDisplayArea');
-                     const img = new Image();
-                     img.src = e.target.result;
-                     imageDisplayArea.innerHTML = '';
-                     imageDisplayArea.appendChild(img);
-                 };
- 
-                 reader.readAsDataURL(file);
-             });*/
+        <div id="blur_result" class="blur_result">
+            <div class="imageContainer" id="blur_imageContainer"></div>
+            <button id="action_btn" type="button" class="btn btn-secondary" onclick="saveFile()">Скачать
+                изображение</button>
+        </div>
 
 
-        </script>
         <script>
             const username = sessionStorage.getItem('username')
             console.log(`Username: ${username}`);
@@ -119,10 +97,12 @@
                 window.location.href = "/auth.html";
             }
         </script>
-        <script src="file_load.js"></script>
-        <script scr="blur_send.js"></script>
+
         <script>
-            function sendFile() {
+
+
+            function bluringImage() {
+                const imageDisplay = document.getElementById("blur_imageContainer")
                 const uploadInput = document.querySelector(".form-upload__input")
                 const blurPercentage = document.getElementById('blurPercentage')
                 const file = uploadInput.files?.[0]
@@ -131,6 +111,7 @@
                     console.log(blurPercentage.value)
                     const formData = new FormData()
                     formData.append("file", file)
+
                     formData.append("percent_blur", blurPercentage.value)
                     fetch('/blur', {
                         method: 'POST',
@@ -138,28 +119,59 @@
                         },
                         body: formData
                     })
-                        .then(response => response.json()) // Обработать ответ JSON
-                        .then(data => {
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const objectURL = URL.createObjectURL(blob);
+                            const image = document.createElement('img');
+                            image.src = objectURL;
+                            image.style.objectFit = "cover"
+                            image.style.width = "100%"
+                            image.style.height = "100%"
+                            image.onload = function () {
 
-                            if (data.code == 200) {
-                                console.log(data)
+                                imageDisplay.appendChild(image);
+
+                            };
 
 
 
-                            }
-                            else {
-
-
-                            }
+                            showResult()
                         })
-                        .catch(error => {
-                            console.log(error)
-
-                        });
+                        .catch(error => console.error('Error fetching image:', error));
                 }
+
             };
+
+
+
+            function showResult() {
+
+                const blurResult = document.getElementById("blur_result")
+                const blurSettings = document.getElementById("blur_settings")
+                blurSettings.style.display = 'none'
+                blurResult.style.display = 'flex'
+
+            }
+
+
+            function saveFile() {
+                const imageURL = blur_imageContainer.querySelector('img').src;
+                console.log("пися")
+                console.log(blur_imageContainer.querySelector('img').src)
+                // const imageURL = imageContainer.querySelector('img').src;
+                const link = document.createElement('a');
+                link.href = imageURL;
+                link.download = 'image.jpg'; // Set the desired filename for the downloaded image
+                link.click();
+
+
+            }
+
+
         </script>
 
+        <script src="file_load.js"></script>
+        <script scr="blur_send.js"></script>
 
     </body>
 
