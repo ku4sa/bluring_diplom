@@ -7,6 +7,7 @@ const { Client } = require('pg'); // Assuming you're using the 'pg' library
 const connectionString = 'postgres://postgres:120902@localhost:8080/bluring_bd';
 const sharp = require('sharp');
 const multer = require('multer');
+const canvas = require('canvas');
 const { type } = require('os');
 const upload = multer();
 
@@ -174,24 +175,48 @@ app.get('/data', (req, res) => {
 app.post('/blur', upload.single('file')
   , async (req, res) => {
     console.log('Полученный файл');
-    const format = 'jpg'
+
+    const width = parseInt(req.body.width)
+    const height = parseInt(req.body.height)
+    const format = req.body.format
     const uploadedFile = req.file;
-    const integerValue = parseInt(req.body.percent_blur);
+    const percentBlur = parseInt(req.body.percent_blur);
+    console.log(format);
+    console.log(height);
+    console.log(width);
     console.log(uploadedFile);
-    console.log(integerValue)
+    console.log(percentBlur)
     if (uploadedFile) {
 
 
       //const buffer = Buffer.from(uploadedFile.buffer, 'base64');
+      if (format != 'bmp') {  // Размыть изображение с помощью Sharp
+        const blurredImage = await sharp(uploadedFile.buffer).resize(width, height,)
+          .blur(percentBlur) // Значение размытия (в пикселях)
+          .toFormat(format)
+          .toBuffer();
+        res.header('Content-Type', `image/${format}`); // Set image content type
+        res.send(blurredImage); // Send the blurred image buffer
+      } else {
+        res.status(400).send({ "message": "error bmp" })
+      }
+      /*else {
+        const blurredImage = await sharp(uploadedFile.buffer).resize(width, height,)
+          .blur(percentBlur) // Значение размытия (в пикселях)
+          .toBuffer();
 
-      // Размыть изображение с помощью Sharp
-      const blurredImage = await sharp(uploadedFile.buffer)
-        .blur(integerValue) // Значение размытия (в пикселях)
-        .toFormat(format)
-        .toBuffer();
+        const canvasElement = new canvas();
+        const ctx = canvasElement.getContext('2d');
+        const imageData = new ImageData(blurredImage.width, blurredImage.height);
+        imageData.data.set(blurredImage);
+        canvasElement.width = imageData.width;
+        canvasElement.height = imageData.height;
+        ctx.putImageData(imageData, 0, 0);
+        const bmpData = canvasToBmp(canvasElement);
 
-      res.header('Content-Type', `image/${format}`); // Set image content type
-      res.send(blurredImage); // Send the blurred image buffer
+        res.header('Content-Type', `image/${format}`); // Set image content type
+        res.send(bmpData); // Send the blurred image buffer
+      }*/
 
       // Отправить размытое изображение в ответ
       //res.send(blurredImage.toString('base64'));

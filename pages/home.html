@@ -67,7 +67,29 @@
 
             <div class="form-group">
                 <label for="blurPercentage">Процент блюринга:</label>
-                <input type="number" class="form-control" id="blurPercentage" min="1" max="100" value="0">
+                <input type="number" class="form-control" id="blurPercentage" min="1" max="100" value="20">
+
+                <label for="format">Формат полученного изображения изображения:</label>
+                <select id="format" name="format">
+                    <option value="bmp">BMP</option>
+                    <option value="png">PNG</option>
+                    <option value="jpg">JPG</option>
+                    <option value="tiff">TIFF</option>
+                    <option value="webp">WebP</option>
+                </select>
+
+                <label for="width">Ширина:</label>
+                <input type="number" id="width" name="width" value="1024">
+
+                <label for="height">Высота:</label>
+                <input type="number" id="height" name="height" value="768">
+
+               
+             
+                <p>Размер файла: <span id="file-size"></span></p>
+
+
+
             </div>
 
             <button id="action_btn" type="button" class="btn btn-secondary" onclick="bluringImage()">Размыть
@@ -80,8 +102,6 @@
             <button id="action_btn" type="button" class="btn btn-secondary" onclick="saveFile()">Скачать
                 изображение</button>
         </div>
-
-
         <script>
             const username = sessionStorage.getItem('username')
             console.log(`Username: ${username}`);
@@ -97,82 +117,7 @@
                 window.location.href = "/auth.html";
             }
         </script>
-
-        <script>
-
-
-            function bluringImage() {
-                const imageDisplay = document.getElementById("blur_imageContainer")
-                const uploadInput = document.querySelector(".form-upload__input")
-                const blurPercentage = document.getElementById('blurPercentage')
-                const file = uploadInput.files?.[0]
-                console.log(file)
-                if (file && file.type.startsWith("image/")) {
-                    console.log(blurPercentage.value)
-                    const formData = new FormData()
-                    formData.append("file", file)
-
-                    formData.append("percent_blur", blurPercentage.value)
-                    fetch('/blur', {
-                        method: 'POST',
-                        headers: {
-                        },
-                        body: formData
-                    })
-                        .then(response => response.blob())
-                        .then(blob => {
-                            const objectURL = URL.createObjectURL(blob);
-                            const image = document.createElement('img');
-                            image.src = objectURL;
-                            image.style.objectFit = "cover"
-                            image.style.width = "100%"
-                            image.style.height = "100%"
-                            image.onload = function () {
-
-                                imageDisplay.appendChild(image);
-
-                            };
-
-
-
-                            showResult()
-                        })
-                        .catch(error => console.error('Error fetching image:', error));
-                }
-
-            };
-
-
-
-            function showResult() {
-
-                const blurResult = document.getElementById("blur_result")
-                const blurSettings = document.getElementById("blur_settings")
-                blurSettings.style.display = 'none'
-                blurResult.style.display = 'flex'
-
-            }
-
-
-            function saveFile() {
-                const imageURL = blur_imageContainer.querySelector('img').src;
-                console.log("пися")
-                console.log(blur_imageContainer.querySelector('img').src)
-                // const imageURL = imageContainer.querySelector('img').src;
-                const link = document.createElement('a');
-                link.href = imageURL;
-                link.download = 'image.jpg'; // Set the desired filename for the downloaded image
-                link.click();
-
-
-            }
-
-
-        </script>
-
         <script src="file_load.js"></script>
-        <script scr="blur_send.js"></script>
-
     </body>
 
 </html>
