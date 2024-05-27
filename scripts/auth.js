@@ -29,11 +29,16 @@ function signIn() {
         if (data.code == 200) {
           console.log(data)
           sessionStorage.setItem('username', data.username);
-
-          // Успешная регистрация
-          window.location.href = "/home.html";
-
-
+          sessionStorage.setItem('token', data.token);
+          fetch('/home', {
+            headers: {
+              Authorization: `Bearer ${data.token}`
+            },
+            method: 'GET',
+          }).then(response => response.text())
+          if (!localStorage.getItem('token')) {
+            window.location.href = 'home.html';
+          }
         }
         else {
           popupMessage.innerHTML = data.error
@@ -80,12 +85,13 @@ function signUp() {
         .then(data => {
           console.log(data)
           if (data.code == 200) {
-
             console.log(data)
             sessionStorage.setItem('username', data.username);
+            alert('Регистрация прошла успешно!');
 
-            // Успешная регистрация
-            window.location.href = "/home.html";
+
+
+            window.location.href = "/auth.html";
 
           }
           else {

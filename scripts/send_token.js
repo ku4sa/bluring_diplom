@@ -35,10 +35,10 @@ function sendToken(token) {
         .then(response => response.json())
         .then(data => {
             console.log(data)
-            if (data.email != null) {
+            if (data.username != null) {
 
-                sessionStorage.setItem('username', data.email);
-                sessionStorage.setItem('image', data.image);
+                sessionStorage.setItem('username', data.username);
+                sessionStorage.setItem('token', data.token)
                 // Успешная регистрация
                 window.location.href = "/home.html";
                 // alert('Регистрация прошла успешно!');

@@ -1,8 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+jwt = require('jsonwebtoken');
+//jwt = require('express-jwt'); // Import for middleware usage
 const { error } = require('console');
+const jsonfile = require('jsonfile');
+const secretsPath = './.secrets/config.json'; // Replace with your actual path
 
+const secret = "989e80118a8be635344bf29ddd3399a3"
 const { Client } = require('pg'); // Assuming you're using the 'pg' library
 const connectionString = 'postgres://postgres:120902@localhost:8080/bluring_bd';
 const sharp = require('sharp');
@@ -11,8 +17,38 @@ const canvas = require('canvas');
 const { type } = require('os');
 const upload = multer();
 
+var Jimp = require("jimp");
 
 const app = express();
+
+
+app.use((req, res, next) => {
+  if (req.headers['authorization']) {
+    jwt.verify(
+      req.headers.authorization.split(' ')[1],
+      secret,
+      (err, payload) => {
+        if (err) next();
+        else if (payload) {
+          req.username = login;
+          if (!req.username) next();
+        }
+      }
+    );
+  }
+  next();
+});
+
+
+app.get('/user', (req, res) => {
+  if (req.user) return res.status(200).json(req.user);
+  else
+    return res
+      .status(401)
+      .json({ message: 'Not authorized' });
+});
+
+
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json());
 
@@ -47,23 +83,23 @@ app.post('/getInfo', (req, res) => {
     .then(async (data) => {
       console.log(data)
       try {
-        const query = `SELECT * FROM users WHERE login = $1`;
+        const query = `SELECT * FROM public."Users" WHERE login = $1`;
         const values = [data.email];
         await client.connect();
         const result = await client.query(query, values);
         //пользователь найден
 
         if (result.rows.length > 0) {
-          res.status(200).send(data)
+
+          res.status(200).send({ code: 200, username: data.email, token: generateAccessToken(data.email) });
           console.log('Успешная  авторизация');
         } else {
-          const query = 'INSERT INTO public.users (login, password) VALUES ($1, $2)'
+          const query = 'INSERT INTO public."Users" (login, password) VALUES ($1, $2)'
           const values = [data.email, null];
           await client.query(query, values);
           console.log('Успешная регистрация');
-          res.status(200).send(data);
+          res.status(200).send({ code: 200, username: data.email, token: generateAccessToken(data.email) });
         }
-        //res.redirect('/data');
       } catch (error) {
         console.error('Ошибка при регистрации пользователя: ', error);
         // res.status(500).send('Неудачная попытка регестрации');
@@ -82,7 +118,7 @@ app.post('/sign_in', async (req, res) => {
   login = req.body['login']
   password = req.body['password']
 
-  const query = `SELECT * FROM users WHERE login = $1`;
+  const query = `SELECT * FROM public."Users" WHERE login = $1`;
   const values = [login];
   await client.connect();
   try {
@@ -92,25 +128,30 @@ app.post('/sign_in', async (req, res) => {
     if (result.rows.length > 0) {
       const user = result.rows[0]; // первого пользователя
       console.log(user)
+      if (user.password == null) {
+        res.status(400).send({ 'code': 400, 'error': 'Авторизуйтесь с помощью Google' });
+      }
       if (user.password == password) {
         console.log("Успешная авторизация", user)
+        const token = generateAccessToken(user)
+        console.log(token)
 
-        res.status(200).send({ 'code': 200, 'username': login, });
+        res.status(200).send({ 'code': 200, 'username': login, 'token': token });
       } else {
-        //res.render('error', { errorMessage: 'Неверный пароль' });
+
         res.status(400).send({ 'code': 400, 'error': 'Неверный пароль' });
       }
     } else {
       res.status(404).send({ 'code': 404, 'error': 'Пользователь не найден' });
 
-      // res.render('error', { errorMessage: 'Пользователь не найден' });
+
     }
   } catch (error) {
 
-    //res.status(500).send({ 'error': 'Глобальная ошибка' }); // Send an internal server error
+
     res.render('error', { 'code': 500, errorMessage: 'Глобальная ошибка' });
   } finally {
-    await client.end(); // Close the database connection
+    await client.end();
   }
 
 })
@@ -124,20 +165,21 @@ app.post('/sign_up', async (req, res) => {
   password = req.body.password
   // Insert form data into the database
   try {
-    const query = `SELECT * FROM users WHERE login = $1`;
+
+
+    const query = `SELECT * FROM public."Users" WHERE login = $1`;
     const values = [login];
     await client.connect();
 
     const result = await client.query(query, values);
     //пользователь найден
     if (result.rows.length == 0) {
-      await client.query('INSERT INTO public.users (login, password) VALUES ($1, $2)', [login, password]);
+      await client.query('INSERT INTO public."Users" (login, password) VALUES ($1, $2)', [login, password]);
 
       res.status(200).send({ 'code': 200, 'username': login, });
     } else {
-      res.status(403).send({ 'code': 403, 'error': 'Пользователь с таким логином уже существует' });
+      res.status(403).send({ 'code': 403, 'error': 'Пользователь с таким именем уже существует' });
     }
-
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(500).send('Неудачная попытка регестрации');
@@ -146,89 +188,143 @@ app.post('/sign_up', async (req, res) => {
   }
 })
 
-app.get('/data', (req, res) => {
-  console.log('lol');
-  console.log(req.query)
-  /*let params = {}
-    let regex = /([^&=]+)=([^&]+)/g, m;
-    while (m = regex.exec(location.href)) {
-        params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
-        console.log(m[1])
-        console.log(m[2])
 
-    }
-    if (Object.keys(params).length > 0) {
-
-        localStorage.setItem('authInfo', JSON.stringify(params))
-    }
-    //hide access token
-    window.history.pushState({}, document.title, "/" + "auth.html")
-    //let info = JSON.parse(localStorage.getItem('authInfo'))
-    console.log(JSON.parse(localStorage.getItem('authInfo')))
-    console.log(info['access_token'])
-    console.log(info['expires_in'])
-    return info['access_token'];*/
-  res.redirect('/token.html', 302);
+app.get('/home', (req, res) => {
+  const user = req.username; // Access user info from decoded token
+  //console.log({ message: `Welcome, ${user}!` });
+  if (user) {
+    res.sendStatus(200)
+  } else {
+    res.sendStatus(401)
+  }
 });
 
 
-app.post('/blur', upload.single('file')
+app.get('/data', (req, res) => {
+  res.redirect('/token.html', 302);
+});
+
+app.post('/history', upload.any(), async (req, res) => {
+  const d1 = req.body.startDate;
+  const d2 = req.body.lastDate;
+  console.log(d1);
+  console.log(d2);
+  if (d1 > d2)
+    res.status(400).send({ "message": "Некорректные данные" })
+  else {
+    client = new Client({ connectionString: connectionString });
+    await client.connect();
+    const result = await client.query('SELECT data as "Дата операции",login as "Пользователь", "resultMessage" as "Комментарий", "isSuccess", image_path, '
+      + 'image_path_after, blur_percent as "Процент блюринга", image_width as "Ширина", image_height as "Высота"'
+      + ' FROM public."BlurActions" '
+      + 'LEFT JOIN public."Parametrs" '
+      + ' ON public."BlurActions".id_parametrs = public."Parametrs".id '
+      + ' LEFT JOIN public."Formats" '
+      + ' ON public."Parametrs".id_formats = public."Formats".id '
+      + ' LEFT JOIN public."Users"'
+      + 'ON public."BlurActions".id_users = public."Users".id '
+      + 'WHERE data BETWEEN $1 AND $2 '
+      + 'ORDER BY data ASC;',
+      [d1, d2]);
+    await client.end();
+    console.log(result.rows)
+
+    res.status(200).send({ 'data': result.rows })
+  }
+});
+
+
+app.post('/change_blur_parametr', upload.any()
   , async (req, res) => {
-    console.log('Полученный файл');
+    try {
+      const blur = parseInt(req.body.blur_percent)
+      client = new Client({ connectionString: connectionString });
+      await client.connect();
+      await client.query('ALTER TABLE public."Parametrs" ALTER COLUMN blur_percent SET DEFAULT ' + blur);
+      await client.end();
+      res.status(200).send({ "message": "Параметр успешно изменен" })
 
-    const width = parseInt(req.body.width)
-    const height = parseInt(req.body.height)
-    const format = req.body.format
-    const uploadedFile = req.file;
-    const percentBlur = parseInt(req.body.percent_blur);
-    console.log(format);
-    console.log(height);
-    console.log(width);
-    console.log(uploadedFile);
-    console.log(percentBlur)
-    if (uploadedFile) {
-
-
-      //const buffer = Buffer.from(uploadedFile.buffer, 'base64');
-      if (format != 'bmp') {  // Размыть изображение с помощью Sharp
-        const blurredImage = await sharp(uploadedFile.buffer).resize(width, height,)
-          .blur(percentBlur) // Значение размытия (в пикселях)
-          .toFormat(format)
-          .toBuffer();
-        res.header('Content-Type', `image/${format}`); // Set image content type
-        res.send(blurredImage); // Send the blurred image buffer
-      } else {
-        res.status(400).send({ "message": "error bmp" })
-      }
-      /*else {
-        const blurredImage = await sharp(uploadedFile.buffer).resize(width, height,)
-          .blur(percentBlur) // Значение размытия (в пикселях)
-          .toBuffer();
-
-        const canvasElement = new canvas();
-        const ctx = canvasElement.getContext('2d');
-        const imageData = new ImageData(blurredImage.width, blurredImage.height);
-        imageData.data.set(blurredImage);
-        canvasElement.width = imageData.width;
-        canvasElement.height = imageData.height;
-        ctx.putImageData(imageData, 0, 0);
-        const bmpData = canvasToBmp(canvasElement);
-
-        res.header('Content-Type', `image/${format}`); // Set image content type
-        res.send(bmpData); // Send the blurred image buffer
-      }*/
-
-      // Отправить размытое изображение в ответ
-      //res.send(blurredImage.toString('base64'));
-      //res.status(200).send({ 'message': "Ок" })
+    } catch (error) {
+      res.status(400).send({ "message": error })
     }
-    else { res.status(400).send({ 'message': "Error" }) }
   })
 
 
+app.get('/blur_parametr',
+  async (req, res) => {
+    try {
+      client = new Client({ connectionString: connectionString });
+      await client.connect();
+      const result = await client.query("SELECT COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_DEFAULT NOTNULL AND COLUMN_NAME = 'blur_percent'");
+      console.log(result.rows[0])
+      await client.end();
+      res.status(200).send({ "code": 200, "blur_parametr": result.rows[0].column_default })
 
+    } catch (error) {
+      res.status(400).send({ "message": error })
+    }
+  })
 
+app.post('/blur', upload.single('file')
+  , async (req, res) => {
+    const format = req.body.format
+    const uploadedFile = req.file;
+    try {
+      const user_id = await getUser(req.body.user);
+      if (uploadedFile == null) throw "Ошибка чтения файла"
+      if (format == null) throw "Ошибка чтения формата"
+      const width = parseInt(req.body.width)
+      const height = parseInt(req.body.height)
+      const percentBlur = parseInt(req.body.percent_blur);
+      const params_id = await saveData(format, width, height, percentBlur);
+      if (uploadedFile) {
+        switch (format) {
+          case 'bmp': {
 
+            const lenna = await Jimp.read(uploadedFile.buffer);
+            await lenna
+              .resize(width, height)
+              .blur(percentBlur)
+              .getBuffer('image/bmp', async (error, buffer) => {
+                if (error) {
+                  await saveBlur(uploadedFile.originalname, uploadedFile.originalname.split('.')[0] + format, params_id, user_id, true, "Ошибка блюринга бибилиотека Jimp: " + error);
+                  throw "Ошибка блюринга бибилиотека Jimp: " + error;
+                }
+                res.header('Content-Type', 'image/bmp');
+                res.send(buffer);
+              })
+            break;
+          }
+          default: {
+            try {
+              const blurredImage = await sharp(uploadedFile.buffer).resize(width, height,)
+                .blur(percentBlur) // Значение размытия (в пикселях)
+                .toFormat(format)
+                .toBuffer();
+              res.header('Content-Type', `image/${format}`);
+              res.send(blurredImage); // отправка блюринга
+            }
+            catch (error) {
+              await saveBlur(uploadedFile.originalname, uploadedFile.originalname.split('.')[0] + '.' + format, params_id, user_id, true, "Ошибка блюринга библиотека Sharp:" + error);
+              throw "Ошибка блюринга библиотека Sharp:" + error;
+            } finally {
+              break;
+            }
+          }
+        }
+        await saveBlur(uploadedFile.originalname, uploadedFile.originalname.split('.')[0] + '.' + format, params_id, user_id, true, "Успешная опперация");
+      }
+      else {
+
+        throw "Ошибка передачи файла"
+      }
+    }
+    catch (error) {
+      await saveBlur(uploadedFile.originalname, uploadedFile.originalname.split('.')[0] + '.' + format, null, null, false, error);
+      console.log(error)
+      res.status(200).send({ 'message': error })
+    }
+  })
 
 app.use(express.static(__dirname + "/pages"));
 app.use(express.static(__dirname + "/styles"));
@@ -240,4 +336,85 @@ app.listen(3000, () => {
 
 
 
-//});
+function getSecret() {
+  const jsonfile = require('jsonfile');
+  const secretsPath = './.secrets/config.json'; // Replace with your actual path
+  try {
+    const secrets = jsonfile.readFileSync(secretsPath);
+    return secrets.JWT_SECRET;
+  } catch (err) {
+    console.error('Error reading secret:', err);
+    return null;
+  }
+}
+
+function generateAccessToken(login) {
+  const payload = {
+    login: login,
+  };
+  console.log('kjk')
+  const secret = getSecret()
+  const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+  console.log(token)
+  return token;
+}
+
+
+async function saveData(format, width, height, blur_percent) {
+  try {
+    client = new Client({ connectionString: connectionString });
+    await client.connect();
+    console.log(format)
+    const result = await client.query(`SELECT * FROM public."Formats" WHERE name = $1`, [format]);
+    if (result.rows[0]) {
+      const format_id = result.rows[0].id; // формат изображения
+      client = new Client({ connectionString: connectionString });
+      await client.connect();
+      const params_result = await client.query('INSERT INTO public."Parametrs" (blur_percent, id_formats, image_width, image_height) VALUES ($1, $2, $3, $4) RETURNING id', [blur_percent, format_id, width, height]);
+      await client.end();
+      if (params_result.rows[0].id) {
+        return params_result.rows[0].id;
+      }
+      else {
+        throw "Ошибка при добавлении параметров блюринга"
+      }
+    }
+    else {
+      throw "Формат не поддерживается"
+    }
+  }
+  catch (error) {
+    console.log(error)
+    throw error;
+  }
+}
+
+
+
+async function getUser(username) {
+  client = new Client({ connectionString: connectionString });
+  await client.connect();
+  const result = await client.query(`SELECT * FROM public."Users" WHERE login = $1`, [username]);
+  await client.end();
+  console.log(result);
+  if (result.rows[0]) {
+    const user_id = result.rows[0].id; // имя пользователя
+    return user_id;
+  } else {
+    throw "Неавторизованный запрос"
+  }
+
+
+}
+
+
+async function saveBlur(filename, newfilename, params_id, user_id, result, message) {
+  client = new Client({ connectionString: connectionString });
+  await client.connect();
+  const now = new Date();
+  await client.query('INSERT INTO public."BlurActions" (image_path, data, id_parametrs, id_users, image_path_after, "isSuccess", "resultMessage") VALUES ( $1, $2, $3, $4, $5, $6, $7) RETURNING id',
+    [filename, now, params_id, user_id, newfilename, result, message]);
+  await client.end();
+
+}
+

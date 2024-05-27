@@ -18,10 +18,13 @@ function bluringImage() {
         const formData = new FormData()
         formData.append("file", file)
 
+        formData.append("user", sessionStorage.getItem('username'))
+
         formData.append("percent_blur", blurPercentage.value)
         fetch('/blur', {
             method: 'POST',
             headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
             },
             body: formData
         })

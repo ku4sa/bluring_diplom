@@ -156,7 +156,7 @@ h1 {
 .header-container {
   display: flex;
   /* Enable flexbox layout for positioning */
-  justify-content: space-between;
+  justify-content: stretch;
   /* Distribute elements evenly with space between */
   align-items: center;
   /* Align items vertically in the center */
@@ -354,8 +354,10 @@ h1 {
 .form-group {
   margin: 20px;
   padding: 20px;
-  box-shadow: 0 0 10px rgba(165, 42, 42, 0.5); /* Тень 10px, полупрозрачная коричневая (#a52a2a) */
-  border: 5px solid #3c372c55; /* Рамка 5px, сплошная, коричневого цвета (#a52a2a) */
+  box-shadow: 0 0 10px rgba(165, 42, 42, 0.5);
+  /* Тень 10px, полупрозрачная коричневая (#a52a2a) */
+  border: 5px solid #3c372c55;
+  /* Рамка 5px, сплошная, коричневого цвета (#a52a2a) */
   border-radius: 10px;
 
   background-color: #ffffff;
@@ -382,7 +384,94 @@ h1 {
   align-items: center;
 }
 
+label {
+  display: flex;
+  /* Размещение элементов в строке */
+  align-items: center;
+  /* Вертикальное выравнивание */
+}
+
+label input {
+  margin-left: 10px;
+  /* Отступ слева от чекбокса */
+}
 
 
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
 
-/**/
+.dropdown i {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  font-size: 16px;
+}
+
+.dropdown:hover i {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+}
+
+table {
+  text-align: center;
+  vertical-align: middle;
+
+}
+
+.table-body {
+  border-collapse: collapse;
+  /* Слияние границ ячеек */
+}
+
+.table-row {
+  border: 1px solid #ccc;
+  padding: 5px;
+  align-items: center;
+}
+
+#table_container {
+  padding: 20px;
+  margin: 30px;
+}
+
+#settings_container {
+  padding: 20px;
+  margin: 30px;
+  align-items: center;
+}
+
+#date_inputs {
+  padding-top: 40px;
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+  gap: 20px;
+
+
+}
+
+#blur_percent {
+  width: 100px;
+}
+
+.btn-dark {
+  background-color: #3c372c;
+
+}
+
+.error-message {
+  color: red;
+  /* Set error message color */
+  margin-top: 5px;
+  /* Add spacing below the input field */
+  display: none;
+  /* Initially hide the error message */
+}

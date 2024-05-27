@@ -2,19 +2,57 @@ const dropFileZone = document.querySelector(".upload-zone_dragover")
 const statusText = document.getElementById("uploadForm_Hint")
 const sizeText = document.getElementById("uploadForm_Size")
 const uploadInput = document.querySelector(".form-upload__input")
-
-
+const blurPercentage = document.getElementById("blurPercentage")
 const format = document.getElementById('format');
 const widthInput = document.getElementById('width');
 const heightInput = document.getElementById('height');
 const fileSizeSpan = document.getElementById('file-size');
 
+getBlurPercent()
 
 
-const blurSettings = document.querySelector(".blur_settings")
+function getBlurPercent() {
+  fetch('/blur_parametr', {
+    method: 'GET',
+    headers: {
+    },
+  }).then(response => response.json()) // Обработать ответ JSON
+    .then(data => {
+      console.log(data)
+      if (data.code == 200) {
+        console.log(data.blur_parametr)
+        blurPercentage.value = data.blur_parametr
+      }
+    })
+    .catch(error => {
+      console.log(error)
+
+    });
+}
+
+
+const checkbox = document.getElementById('preserveAspectRatio');
+
+checkbox.addEventListener('change', function () {
+  if (this.checked) {
+    const width = parseInt(widthInput.value);
+    const height = parseInt(heightInput.value);
+    resizeImage(width, height)
+    const widthnew = parseInt(widthInput.value);
+    const heightnew = parseInt(heightInput.value);
+    calculateFileSize(widthnew, heightnew)
+  } else {
+
+  }
+});
+
 
 widthInput.addEventListener('input', calculateFileSize);
+
+
 heightInput.addEventListener('input', calculateFileSize);
+
+const blurSettings = document.getElementById("blur_settings")
 
 let setStatus = (text) => {
   statusText.textContent = text
@@ -120,24 +158,26 @@ function viewUploadLoader() {
   const uploadLoader = document.getElementById("uploadFile_Loader");
   const btn = document.getElementById("alt_img_btn");
   const blurResult = document.getElementById("blur_result")
-
+  const blurSettings = document.getElementById("blur_settings")
   const blurImageContainer = document.getElementById("blur_imageContainer")
 
   imageContainer.removeChild(imageContainer.firstChild)
-  blurImageContainer.removeChild(blurImageContainer.firstChild)
+  if (blurImageContainer.firstChild) {
+    blurImageContainer.removeChild(blurImageContainer.firstChild)
+  }
+
+
   if (uploadLoader) {
     uploadLoader.style.display = "grid";
 
   } else {
     console.warn("Element with ID 'uploadFile_Loader' not found");
   }
-  if (btn) {
-    btn.style.display = "none";
-    blurSettings.style.display = "none"
-    blurResult.style.display = 'none'
-  } else {
-    console.warn("Element with ID 'uploadFile_Loader' not found");
-  }
+
+  btn.style.display = "none";
+  blurSettings.style.display = "none"
+  blurResult.style.display = 'none'
+
 
 }
 
@@ -169,12 +209,9 @@ function calculateFileSize() {
   const width = parseInt(widthInput.value);
   const height = parseInt(heightInput.value);
 
-  resizeImage(width, height)
-  const widthnew = parseInt(widthInput.value);
-  const heightnew = parseInt(heightInput.value);
 
   // Расчет размера файла в зависимости от формата файла
-  const fileSize = calculateFileSizeForFormat(widthnew, heightnew, format.value);
+  const fileSize = calculateFileSizeForFormat(width, height, format.value);
   fileSizeSpan.textContent = `${fileSize.toFixed(2)} KB`;
 }
 
@@ -194,15 +231,32 @@ function calculateFileSizeForFormat(width, height, format) {
     case 'png':
       // Расчет размера файла PNG
       return calculateFileSizePNG(width, height);
-
-    case 'tiff':
+    case 'bmp':
+      // Расчет размера файла PNG
+      return estimateBMPFileSizeInKB(width, height, 8)
+    case 'webp':
       // Расчет размера файла TIFF
-      return calculateFileSizeTIFF(width, height);
+      return estimateWebPFileSizeInKB(width, height);
 
     default:
       throw new Error(`Unsupported file format: ${format}`);
   }
+
+  function estimateWebPFileSizeInKB(width, height) {
+    const avgWebPCompressionRatio = 0.5; // Average compression ratio (0.5 for 50% reduction)
+    const estimatedSizeInBytes = (width * height * 4) * avgWebPCompressionRatio;
+    const estimatedSizeInKB = estimatedSizeInBytes / 1024;
+    return estimatedSizeInKB
+
+  }
 }
+function estimateBMPFileSizeInKB(width, height, bpp) {
+  const approximateSizeInBytes = (width * height * bpp) / 8 + 54;
+  const approximateSizeInKB = approximateSizeInBytes / 1024;
+  return approximateSizeInKB
+
+}
+
 
 function calculateFileSizeJPEG(width, height) {
   // Приблизительная формула для расчета размера JPEG
@@ -260,6 +314,7 @@ function bluringImage() {
     formData.append('width', widthInput.value)
     formData.append('height', heightInput.value)
     formData.append('format', format.value)
+    formData.append("user", sessionStorage.getItem('username'))
     fetch('/blur', {
       method: 'POST',
       headers: {
@@ -268,6 +323,7 @@ function bluringImage() {
     })
       .then(response => response.blob())
       .then(blob => {
+
         const objectURL = URL.createObjectURL(blob);
         const image = document.createElement('img');
         image.src = objectURL;
@@ -279,7 +335,7 @@ function bluringImage() {
           imageDisplay.appendChild(image);
 
         };
-
+        console.log(objectURL)
 
 
         showResult()
@@ -288,6 +344,7 @@ function bluringImage() {
   }
 
 };
+
 
 
 
@@ -303,7 +360,6 @@ function showResult() {
 
 function saveFile() {
   const imageURL = blur_imageContainer.querySelector('img').src;
-  console.log("пися")
   console.log(blur_imageContainer.querySelector('img').src)
   // const imageURL = imageContainer.querySelector('img').src;
   const link = document.createElement('a');

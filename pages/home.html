@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+<script>
+    if (sessionStorage.getItem('token') == null) {
+        window.location.href = 'auth.html';
+    }
+</script>
 
 <head>
 
@@ -19,8 +24,14 @@
 
 <body>
 
+
     <header>
-        <div class="header-container">
+
+        <nav id="navbar" class="navbar navbar-dark">
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" href="#offcanvasExample"
+                role="button" aria-controls="offcanvasExample" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <h1 class="header-title">Блюринг изображений</h1>
 
             <div class="header-buttons">
@@ -29,12 +40,23 @@
                     <span id='username' class="username">John Doe</span>
                 </div>
                 <button class="button" onclick="logOut()">Выйти</button>
+
             </div>
-        </div>
+        </nav>
+
     </header>
 
     <body>
 
+
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample"
+            aria-labelledby="offcanvasExampleLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasExampleLabel">Меню</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+            </div>
+
+        </div>
         <div id="uploadFile_Loader" class="upload-zone">
             <form class="form-upload" id="uploadForm" method="post" enctype="multipart/form-data">
                 <div class="upload-zone_dragover">
@@ -44,7 +66,7 @@
                         <path d="m16 16-4-4-4 4" />
                     </svg>
                     <p>Перетащи файл сюда</p>
-                    <span class="form-upload__hint" id="hint">Можно загружать только картинки</span>
+                    <span class="form-upload__hint" id="hint">Можно загружать только изображения</span>
                 </div>
                 <div class="form-upload__label" for="uploadForm_file">
                     <span class="form-upload__title">Или нажми кнопку</span>
@@ -69,12 +91,11 @@
                 <label for="blurPercentage">Процент блюринга:</label>
                 <input type="number" class="form-control" id="blurPercentage" min="1" max="100" value="20">
 
-                <label for="format">Формат полученного изображения изображения:</label>
+                <label for="format">Формат полученного изображения:</label>
                 <select id="format" name="format">
                     <option value="bmp">BMP</option>
                     <option value="png">PNG</option>
                     <option value="jpg">JPG</option>
-                    <option value="tiff">TIFF</option>
                     <option value="webp">WebP</option>
                 </select>
 
@@ -83,9 +104,10 @@
 
                 <label for="height">Высота:</label>
                 <input type="number" id="height" name="height" value="768">
-
-               
-             
+                <label for="preserveAspectRatio">
+                    <span>Сохранить пропорции</span>
+                    <input type="checkbox" id="preserveAspectRatio" name="preserveAspectRatio">
+                </label>
                 <p>Размер файла: <span id="file-size"></span></p>
 
 
@@ -116,6 +138,9 @@
 
                 window.location.href = "/auth.html";
             }
+        </script>
+        <script>
+          
         </script>
         <script src="file_load.js"></script>
     </body>
