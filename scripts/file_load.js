@@ -1,5 +1,5 @@
 const dropFileZone = document.querySelector(".upload-zone_dragover")
-const statusText = document.getElementById("uploadForm_Hint")
+const statusText = document.getElementById("statusText")
 const sizeText = document.getElementById("uploadForm_Size")
 const uploadInput = document.querySelector(".form-upload__input")
 const blurPercentage = document.getElementById("blurPercentage")
@@ -9,7 +9,6 @@ const heightInput = document.getElementById('height');
 const fileSizeSpan = document.getElementById('file-size');
 
 getBlurPercent()
-
 
 function getBlurPercent() {
   fetch('/blur_parametr', {
@@ -29,7 +28,6 @@ function getBlurPercent() {
 
     });
 }
-
 
 const checkbox = document.getElementById('preserveAspectRatio');
 
@@ -79,12 +77,12 @@ dropFileZone.addEventListener("drop", function () {
   if (!file) {
     return
   }
-
   if (file.type.startsWith("image/")) {
     uploadInput.files = event.dataTransfer.files
     processingUploadFile(file)
+    setStatus('')
   } else {
-    //setStatus("Можно загружать только изображения")
+    setStatus("Можно загружать только изображения")
     return false
   }
 })
@@ -93,11 +91,11 @@ uploadInput.addEventListener("change", (event) => {
   const file = uploadInput.files?.[0]
   console.log(file)
   if (file && file.type.startsWith("image/")) {
-
-
     processingUploadFile(file)
+    setStatus('')
   } else {
-    //setStatus("Можно загружать только изображения")
+    uploadInput.files[0] = null
+    setStatus("Можно загружать только изображения")
     return false
   }
 })

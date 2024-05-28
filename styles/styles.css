@@ -475,3 +475,18 @@ table {
   display: none;
   /* Initially hide the error message */
 }
+
+.settings-button{
+  align-items: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 5px;
+
+  border-radius: 10px;
+}
+.settings-button:hover {
+  cursor: pointer; /* Изменить курсор на "указатель" при наведении на элемент с классом "my-element" */
+  background-color: #cccccc27;
+}

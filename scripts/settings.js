@@ -1,6 +1,15 @@
 const blur_settings = document.getElementById('blur_percent');
 const blur_btn = document.getElementById('blur_settings_button');
 const blurError = document.getElementById('blurError');
+const dateError = document.getElementById('dateError');
+const history_btn = document.getElementById('history_btn');
+const s_date = document.getElementById('start_date');
+const l_date = document.getElementById('last_date');
+
+
+s_date.addEventListener('change', (event) => parseDate());
+l_date.addEventListener('change', (event) => parseDate());
+
 
 
 getBlurPercent()
@@ -26,8 +35,6 @@ function getBlurPercent() {
 
         });
 }
-
-
 function changeBlurSettings() {
     const formData = new FormData()
     formData.append("blur_percent", blur_settings.value)
@@ -51,9 +58,10 @@ function changeBlurSettings() {
         });
 }
 
-function parseBlur() {
-    console.log('лол')
 
+
+
+function parseBlur() {
     const blur_value = parseInt(blur_settings.value)
     if (blur_value) {
         if (blur_value < 1 || blur_value > 1000) {
@@ -75,31 +83,43 @@ function parseBlur() {
     }
 }
 
-function getDateFromElement(value) {
-    const startDateDiv = document.getElementById(value);
-    if (startDateDiv) {
-        const dateInput = startDateDiv.querySelector("input[type='date']");
-        if (dateInput) {
-            const dateValue = dateInput.value;
-            if (dateValue) {
-                // Convert the date string to a Date object
-                const dateObject = new Date(dateValue);
 
-                // Add timezone offset (+03:00) and format to desired string
-                const formattedDate = dateObject.toISOString().replace('Z', '+03:00');
-                return formattedDate;
-            } else {
-                console.warn('Date input value is empty.');
-                return null;
-            }
-        } else {
-            console.warn("Date input element not found within the given element.");
+function parseDate() {
+    console.log('лол')
+    const dateInput1 = s_date.querySelector("input[type='date']");
+    const dateInput2 = l_date.querySelector("input[type='date']");
+    if (dateInput1.value && dateInput2.value) {
+        const startDateObject = new Date(dateInput1.value);
+        const formattedDate1 = startDateObject.toISOString().replace('Z', '+03:00');
+
+        const lastdateObject = new Date(dateInput2.value);
+        const formattedDate2 = lastdateObject.toISOString().replace('Z', '+03:00');
+
+        if (startDateObject > lastdateObject) {
+            dateError.textContent = 'Некорректный диапазон';
+            dateError.style.display = 'block';
+            history_btn.disabled = true;
             return null;
         }
+        else {
+            dateError.textContent = '';
+            dateError.style.display = 'none';
+            history_btn.disabled = false;
+            return [formattedDate1, formattedDate2];
+        }
     } else {
-        console.warn("Element with ID 'start_date' not found.");
+        dateError.textContent = 'Укажите дату';
+        dateError.style.display = 'block';
+        history_btn.disabled = true;
         return null;
     }
+}
+
+
+
+function getDateFromElement(value) {
+    const startDateDiv = document.getElementById(value);
+    startDateDiv.addEventListener('change', (event) => parseDate(startDateDiv.querySelector("input[type='date']").value));
 }
 
 
@@ -211,15 +231,11 @@ function createTableFromData(data) {
 
 
 function getHistory() {
-    const startDate = getDateFromElement("start_date")
-    const lastDate = getDateFromElement("last_date")
-    console.log(startDate)
-    console.log(lastDate)
-    console.log(startDate)
-    console.log(lastDate)
+    const values = parseDate()
+    console.log(values)
     const formData = new FormData()
-    formData.append("startDate", startDate)
-    formData.append("lastDate", lastDate)
+    formData.append("startDate", values[0])
+    formData.append("lastDate", values[1])
     fetch('/history', {
         method: 'POST',
         headers: {
@@ -237,9 +253,6 @@ function getHistory() {
                     container.removeChild(container.firstChild)
                 }
                 container.appendChild(table);
-
-
-
             }
             else {
 
@@ -250,3 +263,4 @@ function getHistory() {
 
         });
 }
+

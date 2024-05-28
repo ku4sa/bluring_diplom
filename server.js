@@ -131,11 +131,10 @@ app.post('/sign_in', async (req, res) => {
       if (user.password == null) {
         res.status(400).send({ 'code': 400, 'error': 'Авторизуйтесь с помощью Google' });
       }
-      if (user.password == password) {
+      else if (user.password == password) {
         console.log("Успешная авторизация", user)
         const token = generateAccessToken(user)
         console.log(token)
-
         res.status(200).send({ 'code': 200, 'username': login, 'token': token });
       } else {
 
@@ -143,11 +142,8 @@ app.post('/sign_in', async (req, res) => {
       }
     } else {
       res.status(404).send({ 'code': 404, 'error': 'Пользователь не найден' });
-
-
     }
   } catch (error) {
-
 
     res.render('error', { 'code': 500, errorMessage: 'Глобальная ошибка' });
   } finally {
