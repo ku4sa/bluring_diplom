@@ -58,7 +58,6 @@ function parseUserInfo(data) {
     console.log(data)
     console.log(data['name'])
     console.log(data['image'])
-    //let info = JSON.parse(data)
     document.getElementById('username').innerHTML += data['name']
     document.getElementById('image').setAttribute('scr', data['image'])
 }

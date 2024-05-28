@@ -109,42 +109,7 @@ function signUp() {
       popup.style.display = 'block';
     }
   });
-}/*
-function signUp() {
-  const registrationForm = document.getElementById('signUpForm');
-
-  registrationForm.addEventListener('submit', (event) => {
-    event.preventDefault(); // Предотвратить перезагрузку страницы
-
-    const formData = new FormData(registrationForm);
-    // Создать объект FormData
-    console.log(formData)
-    fetch('/signUp', {
-      method: 'POST',
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json; charset=UTF-8",
-      },
-
-      body: formData
-    })
-      .then(response => response.json()) // Обработать ответ JSON
-      .then(data => {
-        if (data.success) {
-          // Успешная регистрация
-          alert('Регистрация прошла успешно!');
-        } else {
-          // Ошибка регистрации
-          alert('Ошибка регистрации: ' + data.error);
-        }
-      })
-      .catch(error => {
-        console.error('Ошибка AJAX:', error);
-      });
-  });
 }
-*/
-
 function signInWithGoogle() {
 
   let endPoint = 'https://accounts.google.com/o/oauth2/auth';
